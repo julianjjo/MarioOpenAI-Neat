@@ -31,10 +31,8 @@ def simulate_species(net, episodes=1, steps=5000):
         cont = 0;
         for j in range(steps):
             inputs = inputs.flatten()
-            print(inputs)
-            # outputs = net.serial_activate(inputs)
-            # actions = get_actions(outputs)
-            actions
+            outputs = net.serial_activate(inputs)
+            actions = get_actions(outputs)
             inputs, reward, is_finished, info = my_env.step(actions)
             cum_reward_before = cum_reward
             cum_reward = info["total_reward"]
