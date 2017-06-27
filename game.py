@@ -15,8 +15,6 @@ parser.add_argument('--generations', type=int, default=50,
                     help="The number of generations to evolve the network")
 parser.add_argument('--checkpoint', type=str,
                     help="Uses a checkpoint to start the simulation")
-parser.add_argument('--num-cores', dest="numCores", type=int, default=4,
-                    help="The number cores on your computer for parallel execution")
 args = parser.parse_args()
 
 local_dir = os.path.dirname(__file__)
@@ -27,13 +25,16 @@ def simulate_species(net, episodes=1, steps=1000):
     fitnesses = []
     for runs in range(episodes):
         my_env = gym.make('ppaquette/meta-SuperMarioBros-v0')
+        inputs = my_env.reset()
         cum_reward = 0.0
         for j in range(steps):
-            inputs = my_env.reset()
             outputs = net.serial_activate(inputs)
             actions = get_actions(outputs)
-            obs, reward, is_finished, info = my_env.step(actions)
+            inputs, reward, is_finished, info = my_env.step(actions)
+            cum_reward_before = cum_reward
             cum_reward = cum_reward + reward
+            if cum_reward_before > cum_reward:
+                break
             my_env.render()
 
         fitnesses.append(cum_reward)
@@ -49,11 +50,6 @@ def get_actions(outputs):
             actions.append(1)
         else:
             actions.append(0)
-    num_random = randrange(1, 6)
-    if actions_is_active(actions) == False:
-        for i in range(len(actions)):
-            if num_random == i:
-                actions[i] = 1
     return actions
 
 
