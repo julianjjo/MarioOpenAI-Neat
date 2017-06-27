@@ -1,0 +1,5 @@
+gym
+git+https://github.com/ppaquette/gym-super-mario.git
+argparse
+numpy
+neat-python
