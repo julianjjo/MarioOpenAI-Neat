@@ -2,4 +2,4 @@ gym
 git+https://github.com/ppaquette/gym-super-mario.git
 argparse
 numpy
-neat-python
+neat-python==0.8

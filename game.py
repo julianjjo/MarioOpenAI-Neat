@@ -16,6 +16,7 @@ parser.add_argument('--generations', type=int, default=50,
 parser.add_argument('--checkpoint', type=str,
                     help="Uses a checkpoint to start the simulation")
 args = parser.parse_args()
+
 my_env = gym.make('ppaquette/meta-SuperMarioBros-Tiles-v0')
 my_env.render()
 inputs_Intial = my_env.reset()
@@ -35,7 +36,7 @@ def simulate_species(net, episodes=1, steps=5000):
             cum_reward = info['distance']
             if cum_reward_before == cum_reward:
                 cont = cont + 1
-            if cont == 20:
+            if cont == 100:
                 break
             if info['life'] == 0:
                 break
@@ -43,7 +44,7 @@ def simulate_species(net, episodes=1, steps=5000):
         fitnesses.append(cum_reward)
 
     fitness = np.array(fitnesses).mean()
-    print("Species fitness: ", str(fitness))
+    print("Species fitness: %s" % str(fitness))
     return fitness
 
 def get_actions(outputs):
@@ -64,9 +65,10 @@ def actions_is_active(actions):
 
 def worker_evaluate_genome(g):
     net = nn.create_feed_forward_phenotype(g)
-    return simulate_species(net, my_env, args.episodes, args.max_steps, render=args.render)
+    return simulate_species(net, args.episodes, args.max_steps)
 
 def train_network():
+
     def evaluate_genome(g):
         net = nn.create_feed_forward_phenotype(g)
         return simulate_species(net, args.episodes, args.max_steps)
@@ -93,7 +95,7 @@ def train_network():
     statistics.save_species_count(pop.statistics)
     statistics.save_species_fitness(pop.statistics)
 
-    print('Number of evaluations: ', format(pop.total_evaluations))
+    print('Number of evaluations: {0}'.format(pop.total_evaluations))
 
     # Show output of the most fit genome against training data.
     winner = pop.statistics.best_genome()
@@ -101,12 +103,12 @@ def train_network():
     # Save best network
     import pickle
     with open('winner.pkl', 'wb') as output:
-       pickle.dump(winner, output, 1)
+        pickle.dump(winner, output, 1)
 
-    print('\nBest genome:\n', format(winner))
+    print('\nBest genome:\n{!s}'.format(winner))
     print('\nOutput:')
 
-    input("Press Enter to run the best genome...")
+    raw_input("Press Enter to run the best genome...")
     winner_net = nn.create_feed_forward_phenotype(winner)
     for i in range(100):
         simulate_species(winner_net, 1, args.max_steps)

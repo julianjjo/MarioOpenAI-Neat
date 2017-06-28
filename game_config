@@ -9,7 +9,7 @@ reproduction_type    = DefaultReproduction
 
 [phenotype]
 input_nodes          = 208
-hidden_nodes         = 10
+hidden_nodes         = 1
 output_nodes         = 6
 initial_connection   = unconnected
 max_weight           = +30
@@ -22,17 +22,17 @@ weight_stdev         = 1.0
 pop_size                = 30
 max_fitness_threshold   = 32000
 prob_add_conn = 0.988
-prob_add_node = 0.50
+prob_add_node = 0.82
 prob_delete_conn = 0.146
 prob_delete_node = 0.1
-prob_mutate_bias = 0.40
+prob_mutate_bias = 0.4
 bias_mutation_power = 2.093
 prob_mutate_response = 0.1
 response_mutation_power = 0.1
 prob_mutate_weight = 0.460
 prob_replace_weight = 0.0245
 weight_mutation_power = 0.825
-prob_mutate_activation = 0.25
+prob_mutate_activation = 0.5
 prob_toggle_link = 0.0138
 reset_on_extinction = 1
 
