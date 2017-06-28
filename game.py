@@ -16,17 +16,14 @@ parser.add_argument('--generations', type=int, default=50,
 parser.add_argument('--checkpoint', type=str,
                     help="Uses a checkpoint to start the simulation")
 args = parser.parse_args()
-
-local_dir = os.path.dirname(__file__)
-config_path = os.path.join(local_dir, 'game_config')
-pop = population.Population(config_path)
+my_env = gym.make('ppaquette/meta-SuperMarioBros-Tiles-v0')
+my_env.render()
+inputs_Intial = my_env.reset()
 
 def simulate_species(net, episodes=1, steps=5000):
     fitnesses = []
     for runs in range(episodes):
-        my_env = gym.make('ppaquette/meta-SuperMarioBros-Tiles-v0')
-        inputs = my_env.reset()
-
+        inputs = inputs_Intial
         cum_reward = 0.0
         cont = 0;
         for j in range(steps):
@@ -35,12 +32,12 @@ def simulate_species(net, episodes=1, steps=5000):
             actions = get_actions(outputs)
             inputs, reward, is_finished, info = my_env.step(actions)
             cum_reward_before = cum_reward
-            cum_reward = info["total_reward"]
-            if (cum_reward_before - 3) > cum_reward:
-                break
+            cum_reward = info['distance']
             if cum_reward_before == cum_reward:
                 cont = cont + 1
-            if cont == 100:
+            if cont == 20:
+                break
+            if info['life'] == 0:
                 break
             my_env.render()
         fitnesses.append(cum_reward)
@@ -109,7 +106,7 @@ def train_network():
     print('\nBest genome:\n', format(winner))
     print('\nOutput:')
 
-    raw_input("Press Enter to run the best genome...")
+    input("Press Enter to run the best genome...")
     winner_net = nn.create_feed_forward_phenotype(winner)
     for i in range(100):
         simulate_species(winner_net, 1, args.max_steps)
