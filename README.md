@@ -1,2 +1,6 @@
 # MarioOpenAI-Neat
-Utiliza la libreria Neat para jugar mario con Gym Mario
+Use https://github.com/ppaquette/gym-super-mario for gym the OpenAI
+For install requirements
+```
+pip install -r requirements.txt
+```
