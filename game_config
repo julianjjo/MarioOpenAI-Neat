@@ -8,9 +8,9 @@ stagnation_type      = DefaultStagnation
 reproduction_type    = DefaultReproduction
 
 [phenotype]
-input_nodes          = 208
+input_nodes          = 172032
 hidden_nodes         = 0
-output_nodes         = 12
+output_nodes         = 6
 initial_connection   = unconnected
 max_weight           = +30
 min_weight           = -30

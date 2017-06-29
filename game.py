@@ -23,7 +23,7 @@ args = parser.parse_args()
 def simulate_species(net, episodes=1, steps=5000):
     fitnesses = []
     for runs in range(episodes):
-        my_env = gym.make('ppaquette/meta-SuperMarioBros-Tiles-v0')
+        my_env = gym.make('ppaquette/meta-SuperMarioBros-v0')
         my_env.render()
         inputs = my_env.reset()
         actions2 = [0, 0, 0, 0, 0, 0]
@@ -32,26 +32,18 @@ def simulate_species(net, episodes=1, steps=5000):
         for j in range(steps):
             inputs = inputs.flatten()
             outputs = net.serial_activate(inputs)
-            outputs1 = outputs[:len(outputs)/2]
-            outputs2 = outputs[len(outputs)/2:]
-            actions1 = get_actions(outputs1)
+            get_decimals(outputs)
+            actions1 = get_actions(outputs)
             if not np.array_equal(actions2, actions1):
                 activate =get_actions_active(actions2, actions1)
                 my_env.step(activate)
             inputs, reward, is_finished, info = my_env.step(actions1)
             cum_reward = info['distance']
-            if info['life'] == 0:
-                break
-            actions2 = get_actions(outputs2)
-            if not np.array_equal(actions1, actions2):
-                activate =get_actions_active(actions1, actions2)
-                my_env.step(activate)
-            inputs, reward, is_finished, info = my_env.step(actions2)
+            actions2 = copy_actions(actions1, actions2)
             cum_reward_before = cum_reward
-            cum_reward = info['distance']
             if cum_reward_before == cum_reward:
                 cont = cont + 1
-            if cont == 50:
+            if cont == cum_reward or cum_reward == 0:
                 break
             if info['life'] == 0:
                 break
@@ -65,25 +57,35 @@ def simulate_species(net, episodes=1, steps=5000):
 def get_actions(outputs):
     actions = [0, 0, 0, 0, 0, 0]
     for i in range(6):
-        if outputs[i] > 0:
+        if outputs[i] >= 5:
             actions[i] = 1
     return actions
-
 
 def get_actions_active(actions1, actions2):
     result = np.equal(actions1, actions2)
     active = actions1
-    for i in range(len(result)):
-        if not result[i]:
-            active[i] = 0
+    for boolean in range(len(result)):
+        if not result[boolean]:
+            active[boolean] = 0
     return active
+
+def copy_actions(actions1, actions2):
+    for action in range(len(actions1)):
+        actions2[action] = actions1[action]
+    return actions2
+
+def get_decimals(outputs):
+    for button in range(len(outputs)):
+        outputs[button] = round(outputs[button],1)
+        outputs[button] = str(outputs[button]-int(outputs[button]))[1:]
+        outputs[button] = outputs[button][1:]
+        outputs[button] = int(outputs[button])
 
 def worker_evaluate_genome(g):
     net = nn.create_feed_forward_phenotype(g)
     return simulate_species(net, args.episodes, args.max_steps)
 
 def train_network():
-
     def evaluate_genome(g):
         net = nn.create_feed_forward_phenotype(g)
         return simulate_species(net, args.episodes, args.max_steps)
