@@ -3,6 +3,7 @@ import gym
 import ppaquette_gym_super_mario
 import os
 import numpy as np
+from copy import deepcopy
 from random import randrange, sample
 from neat import nn, population, statistics
 
@@ -17,43 +18,52 @@ parser.add_argument('--checkpoint', type=str,
                     help="Uses a checkpoint to start the simulation")
 args = parser.parse_args()
 
-my_env = gym.make('ppaquette/meta-SuperMarioBros-Tiles-v0')
-my_env.render()
-inputs_Intial = my_env.reset()
+
 
 def simulate_species(net, episodes=1, steps=5000):
     fitnesses = []
+    actions_before = []
     for runs in range(episodes):
-        inputs = inputs_Intial
+        my_env = gym.make('ppaquette/meta-SuperMarioBros-Tiles-v0')
+        my_env.render()
+        inputs = my_env.reset()
         cum_reward = 0.0
         cont = 0;
         for j in range(steps):
             inputs = inputs.flatten()
             outputs = net.serial_activate(inputs)
-            actions = get_actions(outputs)
-            inputs, reward, is_finished, info = my_env.step(actions)
+            outputs1 = outputs[:len(outputs)/2]
+            outputs2 = outputs[len(outputs)/2:]
+            actions1 = get_actions(outputs1)
+            inputs, reward, is_finished, info = my_env.step(actions1)
+            cum_reward = info['distance']
+            if info['life'] == 0:
+                break
+            actions2 = get_actions(outputs2)
+            if not np.array_equal(actions1, actions2):
+                my_env.step([0, 0, 0, 0, 0, 0])
+            inputs, reward, is_finished, info = my_env.step(actions2)
             cum_reward_before = cum_reward
             cum_reward = info['distance']
             if cum_reward_before == cum_reward:
                 cont = cont + 1
-            if cont == 100:
+            if cont == 50:
                 break
             if info['life'] == 0:
                 break
-            my_env.render()
+        my_env.close()
         fitnesses.append(cum_reward)
 
+    my_env.close()
     fitness = np.array(fitnesses).mean()
     print("Species fitness: %s" % str(fitness))
     return fitness
 
 def get_actions(outputs):
-    actions = []
-    for i in range(len(outputs)):
+    actions = [0, 0, 0, 0, 0, 0]
+    for i in range(6):
         if outputs[i] > 0:
-            actions.append(1)
-        else:
-            actions.append(0)
+            actions[i] = 1
     return actions
 
 
