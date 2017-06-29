@@ -22,11 +22,11 @@ args = parser.parse_args()
 
 def simulate_species(net, episodes=1, steps=5000):
     fitnesses = []
-    actions_before = []
     for runs in range(episodes):
         my_env = gym.make('ppaquette/meta-SuperMarioBros-Tiles-v0')
         my_env.render()
         inputs = my_env.reset()
+        actions2 = [0, 0, 0, 0, 0, 0]
         cum_reward = 0.0
         cont = 0;
         for j in range(steps):
@@ -35,13 +35,17 @@ def simulate_species(net, episodes=1, steps=5000):
             outputs1 = outputs[:len(outputs)/2]
             outputs2 = outputs[len(outputs)/2:]
             actions1 = get_actions(outputs1)
+            if not np.array_equal(actions2, actions1):
+                activate =get_actions_active(actions2, actions1)
+                my_env.step(activate)
             inputs, reward, is_finished, info = my_env.step(actions1)
             cum_reward = info['distance']
             if info['life'] == 0:
                 break
             actions2 = get_actions(outputs2)
             if not np.array_equal(actions1, actions2):
-                my_env.step([0, 0, 0, 0, 0, 0])
+                activate =get_actions_active(actions1, actions2)
+                my_env.step(activate)
             inputs, reward, is_finished, info = my_env.step(actions2)
             cum_reward_before = cum_reward
             cum_reward = info['distance']
@@ -54,7 +58,6 @@ def simulate_species(net, episodes=1, steps=5000):
         my_env.close()
         fitnesses.append(cum_reward)
 
-    my_env.close()
     fitness = np.array(fitnesses).mean()
     print("Species fitness: %s" % str(fitness))
     return fitness
@@ -67,11 +70,13 @@ def get_actions(outputs):
     return actions
 
 
-def actions_is_active(actions):
-    for i in range(len(actions)):
-        if actions[i] == 1:
-            return True
-    return False
+def get_actions_active(actions1, actions2):
+    result = np.equal(actions1, actions2)
+    active = actions1
+    for i in range(len(result)):
+        if not result[i]:
+            active[i] = 0
+    return active
 
 def worker_evaluate_genome(g):
     net = nn.create_feed_forward_phenotype(g)
