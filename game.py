@@ -40,6 +40,7 @@ def simulate_species(net, episodes=1, steps=5000):
         for j in range(steps):
             if args.tilde:
                 inputs = change_for_detected_altitud(inputs)
+            print inputs
             inputs = inputs.flatten()
             outputs = net.serial_activate(inputs)
             outputs = get_decimals(outputs)
@@ -48,6 +49,8 @@ def simulate_species(net, episodes=1, steps=5000):
                 activate =get_actions_active(actions2, actions1)
                 my_env.step(activate)
             inputs, reward, is_finished, info = my_env.step(actions1)
+            if info['life'] == 0:
+                break
             cum_reward = info["total_reward"]
             actions2 = copy_actions(actions1, actions2)
             distance_before = info["distance"]
@@ -55,19 +58,21 @@ def simulate_species(net, episodes=1, steps=5000):
                 cont = cont + 1
             if cont == (info["distance"]*2) or info["distance"] == 0:
                 break
-            if info['life'] == 0:
-                break
         my_env.close()
         fitnesses.append(cum_reward)
 
     fitness = np.array(fitnesses).mean()
     print("Species fitness: %s" % str(fitness))
+    my_env.close()
     return fitness
 
 def change_for_detected_altitud(inputs):
-    for value in range(len(inputs)):
-        if not value == 0:
-            inputs[value] = inputs[value] * value
+    count = 17
+    for pos in range(len(inputs)):
+        for value in range(len(inputs[pos])):
+            if inputs[pos][value] == 1:
+                inputs[pos][value] = inputs[pos][value] * count
+        count = count - 1
     return inputs
 
 def get_actions(outputs):
