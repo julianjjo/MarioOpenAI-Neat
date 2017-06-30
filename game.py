@@ -3,6 +3,7 @@ import gym
 import ppaquette_gym_super_mario
 import os
 import numpy as np
+import multiprocessing
 from copy import deepcopy
 from random import randrange, sample
 from neat import nn, population, statistics
@@ -19,17 +20,21 @@ parser.add_argument('--checkpoint', type=str,
 args = parser.parse_args()
 
 
-
 def simulate_species(net, episodes=1, steps=5000):
     fitnesses = []
     for runs in range(episodes):
-        my_env = gym.make('ppaquette/meta-SuperMarioBros-v0')
+        my_env = gym.make('ppaquette/meta-SuperMarioBros-Tiles-v0')
+        multiprocessing_lock = multiprocessing.Lock()
+        my_env.configure(lock=multiprocessing_lock)
         my_env.render()
         inputs = my_env.reset()
         actions2 = [0, 0, 0, 0, 0, 0]
         cum_reward = 0.0
         cont = 0;
         for j in range(steps):
+            for inpu in range(len(inputs)):
+                if inpu < 11:
+                    outputs[inpu] = outputs[inpu] * 2
             inputs = inputs.flatten()
             outputs = net.serial_activate(inputs)
             get_decimals(outputs)
@@ -38,12 +43,13 @@ def simulate_species(net, episodes=1, steps=5000):
                 activate =get_actions_active(actions2, actions1)
                 my_env.step(activate)
             inputs, reward, is_finished, info = my_env.step(actions1)
-            cum_reward = info['distance']
+            cum_reward = info["total_reward"]
+            distance = info["distance"]
             actions2 = copy_actions(actions1, actions2)
-            cum_reward_before = cum_reward
-            if cum_reward_before == cum_reward:
+            distance_before = distance
+            if distance_before == distance:
                 cont = cont + 1
-            if cont == cum_reward or cum_reward == 0:
+            if cont == distance or distance == 0:
                 break
             if info['life'] == 0:
                 break
