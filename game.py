@@ -40,7 +40,7 @@ def simulate_species(net, episodes=1, steps=5000):
         for j in range(steps):
             inputs = inputs.flatten()
             outputs = net.serial_activate(inputs)
-            get_decimals(outputs)
+            outputs = get_decimals(outputs)
             actions1 = get_actions(outputs)
             if not np.array_equal(actions2, actions1):
                 activate =get_actions_active(actions2, actions1)
@@ -65,7 +65,7 @@ def simulate_species(net, episodes=1, steps=5000):
 
 def get_actions(outputs):
     actions = [0, 0, 0, 0, 0, 0]
-    for i in range(6):
+    for i in range(len(outputs)):
         if outputs[i] >= 5:
             actions[i] = 1
     return actions
@@ -89,6 +89,7 @@ def get_decimals(outputs):
         outputs[button] = str(outputs[button]-int(outputs[button]))[1:]
         outputs[button] = outputs[button][1:]
         outputs[button] = int(outputs[button])
+    return outputs
 
 def worker_evaluate_genome(g):
     net = nn.create_feed_forward_phenotype(g)
