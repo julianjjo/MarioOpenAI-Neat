@@ -17,14 +17,20 @@ parser.add_argument('--generations', type=int, default=50,
                     help="The number of generations to evolve the network")
 parser.add_argument('--checkpoint', type=str,
                     help="Uses a checkpoint to start the simulation")
+parser.add_argument('--tilde', type=bool, default=True,
+                    help="Set False for execution mario with meta inputs. This working more slow and it consumes more processing but evolves better")
+
 args = parser.parse_args()
 
+multiprocessing_lock = multiprocessing.Lock()
 
 def simulate_species(net, episodes=1, steps=5000):
     fitnesses = []
     for runs in range(episodes):
-        my_env = gym.make('ppaquette/meta-SuperMarioBros-Tiles-v0')
-        multiprocessing_lock = multiprocessing.Lock()
+        if args.tilde:
+            my_env = gym.make('ppaquette/meta-SuperMarioBros-Tiles-v0')
+        else:
+            my_env = gym.make('ppaquette/meta-SuperMarioBros-v0')
         my_env.configure(lock=multiprocessing_lock)
         my_env.render()
         inputs = my_env.reset()
@@ -32,9 +38,6 @@ def simulate_species(net, episodes=1, steps=5000):
         cum_reward = 0.0
         cont = 0;
         for j in range(steps):
-            for inpu in range(len(inputs)):
-                if inpu < 11:
-                    outputs[inpu] = outputs[inpu] * 2
             inputs = inputs.flatten()
             outputs = net.serial_activate(inputs)
             get_decimals(outputs)
