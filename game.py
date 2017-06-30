@@ -43,7 +43,7 @@ def simulate_species(net, episodes=1, steps=5000):
             outputs = get_decimals(outputs)
             actions1 = get_actions(outputs)
             if not np.array_equal(actions2, actions1):
-                activate =get_actions_active(actions2, actions1)
+                activate =get_actions_active(actions1, actions2)
                 my_env.step(activate)
             inputs, reward, is_finished, info = my_env.step(actions1)
             cum_reward = info["total_reward"]
