@@ -40,7 +40,6 @@ def simulate_species(net, episodes=1, steps=5000):
         for j in range(steps):
             if args.tilde:
                 inputs = change_for_detected_altitud(inputs)
-            print inputs
             inputs = inputs.flatten()
             outputs = net.serial_activate(inputs)
             outputs = get_decimals(outputs)
