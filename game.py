@@ -36,6 +36,7 @@ def simulate_species(net, episodes=1, steps=5000):
         inputs = my_env.reset()
         actions2 = [0, 0, 0, 0, 0, 0]
         cum_reward = 0.0
+        discount = 0.0
         cont = 0;
         for j in range(steps):
             if args.tilde:
@@ -58,8 +59,12 @@ def simulate_species(net, episodes=1, steps=5000):
             distance_before = info["distance"]
             if distance_before == info["distance"]:
                 cont = cont + 1
-            if cont == (info["distance"]*3) or info["distance"] == 0:
+            if discount >= 1:
+                if cont >= int(round(((info["distance"]*3)/discount),0)):
+                    break
+            if info["distance"] == 0:
                 break
+            discount = discount + 0.01
         my_env.close()
         fitnesses.append(cum_reward)
 
