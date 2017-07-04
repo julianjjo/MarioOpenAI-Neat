@@ -48,21 +48,23 @@ def simulate_species(net, episodes=1, steps=5000):
                 activate =get_actions_active(actions2, actions1)
                 my_env.step(activate)
             inputs, reward, is_finished, info = my_env.step(actions1)
-            if info['life'] == 0:
+            if info['life'] != 3:
                 break
+            if 'ignore' in info:
+                if info['ignore']:
+                    break
             cum_reward = info["total_reward"]
             actions2 = copy_actions(actions1, actions2)
             distance_before = info["distance"]
             if distance_before == info["distance"]:
                 cont = cont + 1
-            if cont == (info["distance"]*2) or info["distance"] == 0:
+            if cont == (info["distance"]*3) or info["distance"] == 0:
                 break
         my_env.close()
         fitnesses.append(cum_reward)
 
     fitness = np.array(fitnesses).mean()
     print("Species fitness: %s" % str(fitness))
-    my_env.close()
     return fitness
 
 def change_for_detected_altitud(inputs):
