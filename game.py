@@ -37,6 +37,7 @@ def simulate_species(net, episodes=1, steps=5000):
         actions2 = [0, 0, 0, 0, 0, 0]
         cum_reward = 0.0
         discount = 0.0
+        time_reset = 0
         cont = 0;
         for j in range(steps):
             if args.tilde:
@@ -49,6 +50,10 @@ def simulate_species(net, episodes=1, steps=5000):
                 activate =get_actions_active(actions2, actions1)
                 my_env.step(activate)
             inputs, reward, is_finished, info = my_env.step(actions1)
+            if info['time'] == 400 and j > 100:
+                time_reset = 1
+            if time_reset == 1:
+                break
             if info['life'] != 3:
                 break
             if 'ignore' in info:
