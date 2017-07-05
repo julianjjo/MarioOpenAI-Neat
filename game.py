@@ -54,11 +54,11 @@ def simulate_species(net, episodes=1, steps=5000):
             if 'ignore' in info:
                 if info['ignore']:
                     break
-            cum_reward = info["total_reward"]
+            cum_reward = cum_reward + reward
             actions2 = copy_actions(actions1, actions2)
             distance_before = info["distance"]
             if distance_before == info["distance"]:
-                cont = cont + 1                
+                cont = cont + 1
                 discount = discount + 0.01
             if discount >= 1:
                 if cont >= int(round(((info["distance"]*3)/discount),0)):
