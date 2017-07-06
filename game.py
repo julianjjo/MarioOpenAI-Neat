@@ -50,7 +50,7 @@ def simulate_species(net, episodes=1, steps=5000):
                 activate =get_actions_active(actions2, actions1)
                 my_env.step(activate)
             inputs, reward, is_finished, info = my_env.step(actions1)
-            if info['time'] == 400 and j > 100:
+            if info['time'] == 400 and j > 20:
                 time_reset = 1
             if time_reset == 1:
                 break

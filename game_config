@@ -9,7 +9,7 @@ reproduction_type    = DefaultReproduction
 
 [phenotype]
 input_nodes          = 208
-hidden_nodes         = 2
+hidden_nodes         = 10
 output_nodes         = 6
 initial_connection   = unconnected
 max_weight           = +30
